@@ -1,27 +1,30 @@
 package calculator
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
 // Calculate receives a calculator/math formula string and returns the result
-func Calculate(formula string) (string, error) {
+func Calculate(formula string) string {
 	formula = strings.ReplaceAll(formula, " ", "")
 	if len(formula) > 0 && formula[0] != '-' {
 		formula = "+" + formula
 	}
 
-	result := float64(0)
 	units := regexp.MustCompile(`(\+|-|\*|/)?\d+`).FindAllString(formula, -1)
+	if len(units) == 0 {
+		return "there is something wrong in the input"
+	}
+
+	result := float64(0)
 	for _, u := range units {
 		operator, number := u[0:1], u[1:len(u)]
 
 		i, err := strconv.ParseFloat(number, 10)
 		if err != nil {
-			return "0", err
+			return err.Error()
 		}
 
 		switch operator {
@@ -34,9 +37,9 @@ func Calculate(formula string) (string, error) {
 		case "/":
 			result /= i
 		default:
-			return "0", fmt.Errorf("unknown symbol: %s", operator)
+			return "unknown symbol: %s " + operator
 		}
 	}
 
-	return strconv.FormatFloat(result, 'f', -1, 64), nil
+	return strconv.FormatFloat(result, 'f', -1, 64)
 }
